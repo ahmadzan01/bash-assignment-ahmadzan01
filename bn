@@ -76,3 +76,91 @@ then
     echo "No data for $1" >&2
     exit 4
 fi
+
+# DATA COLLECTION -------------------------------------------------------
+
+# Male name data
+male_name_data=$(grep -i -E "^[a-z]+,[M],[1-9][0-9]*" "./us_baby_names/yob$1.txt")
+
+# Female name data
+female_name_data=$(grep -i -E "^[a-z]+,[F],[1-9][0-9]*" "./us_baby_names/yob$1.txt")
+
+# Total male name count
+total_male_count=$(grep -i -E "^[a-z]+,[M],[1-9][0-9]*" "./us_baby_names/yob$1.txt" | wc -l | xargs)
+
+# Total female name count
+total_female_count=$(grep -i -E "^[a-z]+,[F],[1-9][0-9]*" "./us_baby_names/yob$1.txt" | wc -l | xargs)
+
+# Prints out the ranking of the name among others in a specific year for a gender
+#
+# PARAMS: $1 = name
+#         $2 = gender
+#         $3 = year
+# RETURNS: ranking of name among others
+
+rank_name() {
+    gender_type=""
+    total_count=0
+    name_data=""
+    if [[ $2 == "m" || $2 == "M" ]]
+    then
+        gender_type="male"
+        total_count=$((total_male_count))
+        name_data=$male_name_data
+    elif [[ $2 == "f" || $2 == "F" ]]
+    then
+        gender_type="female"
+        total_count=$((total_female_count))
+        name_data=$female_name_data
+    fi
+
+    name_rank=1
+    found_name="F"
+    while read line
+    do
+        if echo "$line" | grep -i -E "^$1,[$2],[1-9][0-9]*" > /dev/null
+        then
+            found_name="T"
+            echo "$3: $1 ranked $name_rank out of $total_count $gender_type names."
+            break
+        else
+            name_rank=$((name_rank + 1))
+        fi
+    done <<< "$name_data"
+
+    if [[ $found_name == "F" ]]
+    then
+        echo "$3: $1 not found among $gender_type names"
+    fi
+}
+
+# Read names from each line
+while read name_line
+do
+    # Check if all names are valid
+    for single_name in $name_line
+    do
+        # Not valid name
+        if [[ ! $single_name =~ ^[A-Za-z]+$ ]]
+        then
+            echo "Badly formatted name: $single_name" >&2
+            exit 3
+        fi
+    done
+
+    # Search for names in data
+    for single_name in $name_line
+    do
+        if [[ $2 == "m" || $2 == "M" ]]
+        then
+            rank_name $single_name "M" $1 
+        elif [[ $2 == "f" || $2 == "F" ]]
+        then
+            rank_name $single_name "F" $1
+        elif [[ $2 == "b" || $2 == "B" ]]
+        then
+            rank_name $single_name "M" $1
+            rank_name $single_name "F" $1
+        fi
+    done
+done
