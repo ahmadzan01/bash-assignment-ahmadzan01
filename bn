@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Naqeeb Ahmadzan, McMaster University, 2024
+#
+# Format: bn "year" "gender"
+# Expected output: "year": "name" ranked "rank" out of "count" "gender" names.
+#
+# This utility script returns the rank of a name in a specific year
+# by comparing it to the ranks of other names
+
+
+# ERRORS/HELP ----------------------------------------------------------------
+
+# Prints out the usage of this script
+#
+# PARAMS: $1 = optional exit code
+# RETURNS: usage of script
+#          optional exit code
+usage() {
+    echo "bn <year> <assigned gender: f|F|m|M|b|B>" >&2
+    if [[ ! $# -eq 0 ]]
+    then
+        exit $1
+    fi
+}
+
+# Prints out the help menu of this script
+#
+# PARAMS: none
+# RETURNS: help menu script
+help() {
+    echo "bn [v1.0.0]"
+    echo ""
+    echo "Overview:"
+    echo "bn is a bash script that is used to determine the"
+    echo "ranks of names among others in a specificed year "
+    echo "from 1880 to 2022."
+    echo ""
+    echo "Usage:"
+    usage
+    echo ""
+    echo "Argument Uses:"
+    echo "<year>: The year at which the script searches the names in"
+    echo "<assigned gender>: The gender to compare the name's rank"
+    echo " - m/M: Males"
+    echo " - f/F: Females"
+    echo " - b/B: Males and Females"
+    echo ""
+}
+
+# Help menu
+if [[ $1 == "--help" ]]
+then
+    help
+
+# Not right number of arguments
+elif [[ $# != 2 ]]
+then
+    usage 1
+
+# Badly formatted year
+elif [[ ! $1 =~ ^[1-9][0-9]{3}$ ]]
+then
+    echo "Badly formatted assigned year: $1" >&2
+    usage 2
+    
+# Badly formatted gender
+elif [[ ! $2 =~ ^[fFmMbB]{1}$ ]]
+then
+    echo "Badly formatted assigned gender: $2" >&2
+    usage 2
+
+# No data for year
+elif [[ $1 -lt 1880 || $1 -gt 2022 ]]
+then
+    echo "No data for $1" >&2
+    exit 4
+fi

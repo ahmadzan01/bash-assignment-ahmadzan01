@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# A simple framework for testing the bn scripts
+#
+# Returns the number of failed test cases.
+#
+# Format of a test:
+# test 'command' expected_return_value 'stdin text' 'expected stdout' 'expected stder
+##########################################
+#EXAMPLE TEST CASES
+##########################################
+echo "hello, world!"
